@@ -3,12 +3,15 @@ use std::fs;
 use std::process;
 use std::error::Error;
 use minigrep::{search, search_case_insensitive};
+use minigrep::Config;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    // Now letting config take in an iterator
+    // let args: Vec<String> = env::args().collect();
     // dbg!(args);
 
-    let config = Config::build(&args).unwrap_or_else(|err| {
+    // env::args() returns an iterator
+    let config = Config::build(env::args()).unwrap_or_else(|err| {
         eprintln!("Problem parsing arguments: {}", err);
         process::exit(1);
     });
@@ -44,22 +47,3 @@ fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-struct Config {
-    pub query: String,
-    pub file_path: String,
-    pub ignore_case: bool,
-}
-
-impl Config {
-    // previously parse_config
-    // new functions are expected to never fail --> switching to build instead
-    fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments");
-        }
-        let query = args[1].clone();
-        let file_path = args[2].clone();
-        let ignore_case = env::var("IGNORE_CASE").is_ok();
-        Ok(Config {query, file_path, ignore_case})
-    }
-}
